@@ -1,4 +1,5 @@
 const { startDB } = require('./config/db-connection')
+require('dotenv').config()
 
 startDB()
   .then(() => {
