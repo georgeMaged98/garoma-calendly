@@ -1,5 +1,6 @@
 const MeetingModel = require('./meeting.model')
 const LogicError = require('../errors/LogicError')
+const { prepareConflictFilter } = require('./meeting.helper')
 
 const createMeeting = async (req, res, next) => {
   try {
@@ -19,76 +20,14 @@ const createMeeting = async (req, res, next) => {
     const end = new Date(year, month - 1, day, Number(endHours) + 2, endMins) // Added Two Hours to compensate UTC difference
 
     // Check if inviter is free at this time
-    const inviterMeetingsPromise = MeetingModel.find({
-      $or: [
-        {
-          invitee: inviter,
-          start: { $lte: start },
-          end: { $gte: start },
-        },
-        {
-          invitee: inviter,
-          start: { $lte: end },
-          end: { $gte: end },
-        },
-        {
-          invitee: inviter,
-          start: { $gte: start },
-          end: { $lte: end },
-        },
-        {
-          inviter: inviter,
-          start: { $lte: start },
-          end: { $gte: start },
-        },
-        {
-          inviter: inviter,
-          start: { $lte: end },
-          end: { $gte: end },
-        },
-        {
-          inviter: inviter,
-          start: { $gte: start },
-          end: { $lte: end },
-        },
-      ],
-    })
+    const inviterMeetingsPromise = MeetingModel.find(
+      prepareConflictFilter(inviter, start, end)
+    )
 
     // Check if invitee is free at this time
-    const inviteeMeetingsPromise = MeetingModel.find({
-      $or: [
-        {
-          invitee: invitee,
-          start: { $lte: start },
-          end: { $gte: start },
-        },
-        {
-          invitee: invitee,
-          start: { $lte: end },
-          end: { $gte: end },
-        },
-        {
-          invitee: invitee,
-          start: { $gte: start },
-          end: { $lte: end },
-        },
-        {
-          inviter: invitee,
-          start: { $lte: start },
-          end: { $gte: start },
-        },
-        {
-          inviter: invitee,
-          start: { $lte: end },
-          end: { $gte: end },
-        },
-        {
-          inviter: invitee,
-          start: { $gte: start },
-          end: { $lte: end },
-        },
-      ],
-    })
+    const inviteeMeetingsPromise = MeetingModel.find(
+      prepareConflictFilter(invitee, start, end)
+    )
 
     const [inviterMeetings, inviteeMeetings] = await Promise.all([
       inviterMeetingsPromise,
