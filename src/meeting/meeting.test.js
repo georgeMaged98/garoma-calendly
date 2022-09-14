@@ -22,19 +22,19 @@ afterEach((done) => {
 
 describe('POST /meetings', () => {
   test('create successful meeting', (done) => {
+    const newMeeting = {
+      inviter: '1234',
+      invitee: '5678',
+      date: '2022-10-11',
+      startTime: '12:00',
+      endTime: '14:00',
+    }
     request(server)
       .post('/meetings')
-      .send({
-        inviter: '1234',
-        invitee: '5678',
-        date: '2022-10-11',
-        startTime: '12:00',
-        endTime: '14:00',
-      })
+      .send(newMeeting)
       .expect(201)
       .then(async (res) => {
-        assert(res.body.data.inviter === '1234')
-
+        assert(res.body.data.inviter === newMeeting.inviter)
         const meeting = await MeetingModel.findById(res.body.data._id)
         assert(meeting !== null)
         done()

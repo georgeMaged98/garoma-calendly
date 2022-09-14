@@ -4,14 +4,10 @@ const LogicError = require('../errors/LogicError')
 const createMeeting = async (req, res, next) => {
   try {
     const { inviter, invitee, date, startTime, endTime } = req.body
-    const dateBreakDown = date.split('-')
-    const [year, month, day] = dateBreakDown
 
-    const startTimeBreakDown = startTime.split(':')
-    const [startHours, startMins] = startTimeBreakDown
-
-    const endTimeBreakDown = endTime.split(':')
-    const [endHours, endMins] = endTimeBreakDown
+    const [year, month, day] = date.split('-')
+    const [startHours, startMins] = startTime.split(':')
+    const [endHours, endMins] = endTime.split(':')
 
     const start = new Date(
       year,
@@ -107,14 +103,15 @@ const createMeeting = async (req, res, next) => {
       throw new LogicError(
         'Inviter is not free at the mentioned timings, Please pick another time!'
       )
+
     // Check Date is in the future
     const today = new Date()
     if (start < today) throw new LogicError('Start Date Must Be In The Future!')
+
     // Check Start Date After End Date
-
     if (start > end) throw new LogicError('Start Date Must Be Before End Date!')
-    // Create Meeting
 
+    // Create Meeting
     const newMeeting = {
       inviter,
       invitee,
